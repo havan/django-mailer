@@ -48,7 +48,7 @@ def send_mail(subject, message, from_email, recipient_list, priority="medium",
 
 def send_html_mail(subject, message, message_html, from_email, recipient_list,
                    priority="medium", fail_silently=False, auth_user=None,
-                   auth_password=None):
+                   auth_password=None, reply_to=None):
     """
     Function to queue HTML e-mails
     """
@@ -61,14 +61,17 @@ def send_html_mail(subject, message, message_html, from_email, recipient_list,
     # need to do this in case subject used lazy version of ugettext
     subject = force_unicode(subject)
     message = force_unicode(message)
+
+    headers = {'Reply-To': reply_to}
     
     msg = make_message(subject=subject,
                        body=message,
                        from_email=from_email,
                        to=recipient_list,
+                       headers=headers,
                        priority=priority)
     email = msg.email
-    email = EmailMultiAlternatives(email.subject, email.body, email.from_email, email.to)
+    email = EmailMultiAlternatives(email.subject, email.body, email.from_email, email.to, headers=email.extra_headers)
     email.attach_alternative(message_html, "text/html")
     msg.email = email
     msg.save()
